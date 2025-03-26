@@ -1,10 +1,48 @@
 import { ElMessage } from 'element-plus'
 
 /**
- * HTTP请求合并
- * @class MergeRequest
+ * 请求队列
+ * @class RequestQueue
  */
-export class MergeRequest {
+export class RequestQueue {
+  max = 100 // 默认值前置声明
+  running = 0
+  queue = []
+  constructor() {
+    const maxCount = Number(import.meta.env.VITE_APP_API_MAX_REQUEST_COUNT ?? 100) // 使用空值合并运算符并确保数值合法
+    this.max = Number.isInteger(maxCount) && maxCount >= 0 ? maxCount : 100
+  }
+
+  /**
+   * 添加一个请求到队列中。
+   * @param {Function} request - 返回 Promise 的异步请求函数。
+   * @returns {Promise} - 请求的结果。
+   */
+  async add(request) {
+    // 如果当前运行的请求数已达到最大值，将请求加入等待队列
+    if (this.running >= this.max) {
+      await new Promise((resolve) => this.queue.push(() => resolve())) // 使用函数包装 resolve，避免直接存储 resolve 引发潜在问题
+    }
+    this.running++
+
+    try {
+      return await request()
+    } finally {
+      this.running--
+      // 从队列中取出下一个等待的请求并执行
+      const nextResolve = this.queue.shift()
+      if (nextResolve) {
+        nextResolve() // 调用 resolve 解锁等待的请求
+      }
+    }
+  }
+}
+
+/**
+ * HTTP请求合并
+ * @class RequestMerge
+ */
+export class RequestMerge {
   constructor() {
     this.requestMap = new Map() // 创建一个Map对象，用于存储请求的键值对
   }
@@ -19,7 +57,7 @@ export class MergeRequest {
    * @param {Object} axiosConfig - 基础Axios配置项
    * @returns {Promise} 合并后的Promise对象（已缓存的请求实例或新建的请求）
    */
-  merge(instance, method, url, data, config, axiosConfig) {
+  request(instance, method, url, data, config, axiosConfig) {
     // 验证HTTP方法是否合法
     const validMethods = ['get', 'post', 'put', 'delete', 'patch']
     if (!validMethods.includes(method.toLowerCase())) {

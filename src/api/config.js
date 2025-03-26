@@ -1,18 +1,21 @@
 import axios from 'axios'
 import {
-  MergeRequest,
+  RequestMerge,
   errorFilterHook,
   corsHook,
   setHeaderAuthorizationHook,
   setCommonParamsHook,
+  RequestQueue,
 } from './utils'
 
-const mergeRequest = new MergeRequest()
+const requestMerge = new RequestMerge()
+const requestQueue = new RequestQueue()
 
 export default class Api {
-  constructor(axiosConfig, errorConfig) {
+  constructor(axiosConfig, errorConfig, queue = false) {
+    this.queue = typeof queue !== 'boolean' ? false : queue // 默认为关闭请求队列
     this.instance = axios.create()
-    this.axiosConfig = axiosConfig // 存储axiosConfig，用于mergeRequest
+    this.axiosConfig = axiosConfig // 存储axiosConfig，用于RequestMerge
     this.instance.interceptors.request.use(function (config) {
       config = { ...config, ...axiosConfig } // merge axiosConfig with config
       config = corsHook(config) // add cors hook
@@ -41,22 +44,32 @@ export default class Api {
   }
 
   get(url, data, config) {
-    return mergeRequest.merge(this.instance, 'get', url, data, config, this.axiosConfig)
+    const requestTask = () =>
+      requestMerge.request(this.instance, 'get', url, data, config, this.axiosConfig)
+    return this.queue ? requestQueue.add(requestTask) : requestTask()
   }
 
   post(url, data, config) {
-    return mergeRequest.merge(this.instance, 'post', url, data, config, this.axiosConfig)
+    const requestTask = () =>
+      requestMerge.request(this.instance, 'post', url, data, config, this.axiosConfig)
+    return this.queue ? requestQueue.add(requestTask) : requestTask()
   }
 
   put(url, data, config) {
-    return mergeRequest.merge(this.instance, 'put', url, data, config, this.axiosConfig)
+    const requestTask = () =>
+      requestMerge.request(this.instance, 'put', url, data, config, this.axiosConfig)
+    return this.queue ? requestQueue.add(requestTask) : requestTask()
   }
 
   delete(url, data, config) {
-    return mergeRequest.merge(this.instance, 'delete', url, data, config, this.axiosConfig)
+    const requestTask = () =>
+      requestMerge.request(this.instance, 'delete', url, data, config, this.axiosConfig)
+    return this.queue ? requestQueue.add(requestTask) : requestTask()
   }
 
   patch(url, data, config) {
-    return mergeRequest.merge(this.instance, 'patch', url, data, config, this.axiosConfig)
+    const requestTask = () =>
+      requestMerge.request(this.instance, 'patch', url, data, config, this.axiosConfig)
+    return this.queue ? requestQueue.add(requestTask) : requestTask()
   }
 }
