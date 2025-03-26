@@ -39,26 +39,24 @@ export default class Api {
       },
     )
   }
+
   get(url, data, config) {
     return mergeRequest.merge(this.instance, 'get', url, data, config, this.axiosConfig)
   }
-  // get(url, data, config) {
-  //   return this.instance.get(url, { params: data, ...config })
-  // }
 
   post(url, data, config) {
-    return this.instance.post(url, data, config)
+    return mergeRequest.merge(this.instance, 'post', url, data, config, this.axiosConfig)
   }
 
   put(url, data, config) {
-    return this.instance.put(url, data, config)
+    return mergeRequest.merge(this.instance, 'put', url, data, config, this.axiosConfig)
   }
 
   delete(url, data, config) {
-    return this.instance.delete(url, { params: data, ...config })
+    return mergeRequest.merge(this.instance, 'delete', url, data, config, this.axiosConfig)
   }
 
   patch(url, data, config) {
-    return this.instance.patch(url, data, config)
+    return mergeRequest.merge(this.instance, 'patch', url, data, config, this.axiosConfig)
   }
 }
