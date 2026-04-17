@@ -6,9 +6,6 @@ dist-ssr
 coverage
 
 # 忽略所有的JS文件
-**/*.js
-**/*.jsx
-**/*.ts
-**/*.tsx
-**/*.mjs
-**/*.cjs
+**/*.{js,jsx,ts,tsx,mjs}
+
+index.html

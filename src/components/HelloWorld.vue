@@ -1,10 +1,17 @@
 <script setup>
+import { ElButton } from 'element-plus'
+import Api from '../api'
+
 defineProps({
   msg: {
     type: String,
     required: true,
   },
 })
+
+function handlerClick() {
+  Api.getProduct()
+}
 </script>
 
 <template>
@@ -15,6 +22,9 @@ defineProps({
       <a href="https://vite.dev/" target="_blank" rel="noopener">Vite</a> +
       <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>.
     </h3>
+    <div>
+      <ElButton type="primary" @click="handlerClick">Button</ElButton>
+    </div>
   </div>
 </template>
 

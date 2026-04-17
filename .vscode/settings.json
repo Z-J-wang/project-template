@@ -14,5 +14,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "npm.packageManager": "yarn",
   "stylelint.enable": true,
-  "stylelint.validate": ["css", "html", "less", "vue", "vue-html"]
+  "stylelint.validate": ["css", "html", "less", "vue", "vue-html"],
+  "cSpell.words": ["VITE"]
 }
